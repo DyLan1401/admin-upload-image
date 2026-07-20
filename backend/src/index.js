@@ -1,0 +1,22 @@
+import "dotenv/config";
+import express from "express";
+import imageRoute from "../src/routes/image.js"
+const app = express();
+
+
+//
+app.use("/api/admin", imageRoute);
+
+
+//test
+app.get("/health", (req, res) => {
+    res.json({
+        status: "ok"
+    });
+});
+
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`đang chạy ở PORT:${PORT}`)
+});

@@ -1,0 +1,16 @@
+DROP TABLE IF EXISTS images;
+
+CREATE TABLE images (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL ,
+  mime_type VARCHAR(255) NOT NULL,
+  url_thumbnail VARCHAR(500) NOT NULL,
+  url_medium VARCHAR(500) NOT NULL,
+  url_large VARCHAR(500) NOT NULL,
+  created_by BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   CONSTRAINT fk_images_admin
+    FOREIGN KEY (created_by) REFERENCES admin(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+);
