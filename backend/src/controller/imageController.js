@@ -16,10 +16,11 @@ export const PostImage = async (req, res) => {
         });
 
     } catch (error) {
+        const status = error.statusCode || 500;
 
-        return res.status(400).json({
+        return res.status(status).json({
             success: false,
-            error: error.message
+            message: error.message || "Internal Server Error"
         });
 
     }

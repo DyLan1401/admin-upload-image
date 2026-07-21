@@ -124,13 +124,19 @@ export const PostImage = async ({ file, title, description }) => {
 
     //Check validate
     if (!file) {
-        throw new Error("Image file is required.");
+        const error = new Error("Image file is required.");
+        error.statusCode = 400;
+        throw error;
     }
     if (!title) {
-        throw new Error("Title is required.");
+        const error = new Error("Title is required.");
+        error.statusCode = 400;
+        throw error;
     }
     if (!description) {
-        throw new Error("Description is required.");
+        const error = new Error("Description is required.");
+        error.statusCode = 400;
+        throw error;
     }
 
     //Call fun 
@@ -146,7 +152,7 @@ export const PostImage = async ({ file, title, description }) => {
         title,
         description,
         mime_type: file.mimetype,
-        public_id: null,
+        public_id: publicId,
         ...imageUrls
     };
 
