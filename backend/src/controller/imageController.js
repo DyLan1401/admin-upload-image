@@ -4,21 +4,22 @@ import * as ImageService from "../service/imageService.js"
 export const PostImage = async (req, res) => {
     try {
         const file = req.file;
+        const { title, description } = req.body;
 
 
-        const result = await ImageService.PostImage(file);
+        const result = await ImageService.PostImage({ file, title, description });
 
         return res.status(201).json({
             success: true,
-            message: "đã tải ảnh lên thành công",
+            message: "Validate Success",
             data: result
         });
+
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(400).json({
             success: false,
-            message: "hệ thống đang bị lỗi hãy thử lại sau.",
-            error: error.message,
+            error: error.message
         });
 
     }
@@ -39,11 +40,11 @@ export const GetImage = async (req, res) => {
         });
     } catch (error) {
 
-        return res.status(500).json({
-            success: false,
-            message: "hệ thống đang bị lỗi hãy thử lại sau. ",
-            error: error.message
 
+        return res.status(400 || 500).json({
+            success: false,
+            error: error.message || "hệ thống đang bị lỗi hãy thử lại sau."
         });
+
     }
 }

@@ -5,6 +5,7 @@ CREATE TABLE images (
   title VARCHAR(255) NOT NULL,
   description TEXT NOT NULL ,
   mime_type VARCHAR(255) NOT NULL,
+  public_id VARCHAR(255) UNIQUE,
   url_thumbnail VARCHAR(500) NOT NULL,
   url_medium VARCHAR(500) NOT NULL,
   url_large VARCHAR(500) NOT NULL,

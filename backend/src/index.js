@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import imageRoute from "../src/routes/image.js"
+import imageRoute from "../src/routes/imageRoute.js"
 const app = express();
 
 
