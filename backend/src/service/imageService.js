@@ -1,6 +1,8 @@
 import streamifier from "streamifier";
 import cloudinary from "../config/cloudinary.js"
+import pool from "../config/database.js"
 
+//upload ảnh lên cloudinary
 const uploadToCloudinary = async (file) => {
 
     //trả về một Promise để xử lý stream async
@@ -38,8 +40,10 @@ const uploadToCloudinary = async (file) => {
 
 };
 
+//generate 3 url image
 const generateImageUrls = (publicId) => {
 
+    //tạo url ảnh thumbnail
     const thumbnail = cloudinary.url(publicId,
         {
             width: 150,
@@ -48,6 +52,8 @@ const generateImageUrls = (publicId) => {
             quality: "auto:good",
             fetch_format: "auto"
         });
+
+    //tạo url ảnh medium
     const medium = cloudinary.url(publicId,
         {
             width: 600,
@@ -57,6 +63,8 @@ const generateImageUrls = (publicId) => {
             quality: "auto:good",
             fetch_format: "auto"
         });
+
+    //tạo url ảnh large
     const large = cloudinary.url(publicId,
         {
             width: 1200,
@@ -73,8 +81,40 @@ const generateImageUrls = (publicId) => {
     }
 };
 
+//save image and metadata vào database
+const saveImage = async (imageData) => {
+    //tạo object 
+    const {
+        title,
+        description,
+        mime_type,
+        public_id,
+        url_thumbnail,
+        url_medium,
+        url_large,
+    } = imageData;
 
-//
+    //viết lệnh SQl thực thi
+    const [result] = await pool.query(
+        `INSERT INTO images (title,description,mime_type,public_id,url_thumbnail,url_medium,url_large)
+      VALUES (?,?,?,?,?,?,?) `
+        , [title,
+            description,
+            mime_type,
+            public_id,
+            url_thumbnail,
+            url_medium,
+            url_large]
+    );
+
+    return {
+        //trả về id tự động tăng
+        id: result.insertId,
+        ...imageData
+    }
+}
+
+//xử lí và upload ảnh
 export const PostImage = async ({ file, title, description }) => {
 
     if (!file) {
@@ -86,21 +126,26 @@ export const PostImage = async ({ file, title, description }) => {
     if (!description) {
         throw new Error("Description is required.");
     }
-
+    //
     const uploadedImage = await uploadToCloudinary(file);
-
 
     const publicId = uploadedImage.public_id;
     const imageUrls = generateImageUrls(publicId);
 
-    return {
+    const imageData = {
         title,
         description,
-        ...uploadedImage,
+        mime_type: file.mimetype,
+        public_id: uploadedImage.public_id,
         ...imageUrls
     };
 
-}
+    const savedImage = await saveImage(imageData);
+
+    return savedImage;
+
+};
+
 //
 export const GetImage = async () => {
     return {
