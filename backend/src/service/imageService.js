@@ -10,8 +10,6 @@ const uploadToCloudinary = async (file) => {
             {
                 //option
                 folder: "admin-images",
-                overwrite: false,
-                quality: "auto:good",
             },
             //cb nhận result trả về từ Cloudinary
             (error, result) => {
@@ -38,7 +36,44 @@ const uploadToCloudinary = async (file) => {
         streamifier.createReadStream(file.buffer).pipe(uploadStream)
     });
 
-}
+};
+
+const generateImageUrls = (publicId) => {
+
+    const thumbnail = cloudinary.url(publicId,
+        {
+            width: 150,
+            height: 150,
+            crop: "fill",
+            quality: "auto:good",
+            fetch_format: "auto"
+        });
+    const medium = cloudinary.url(publicId,
+        {
+            width: 600,
+            height: 600,
+            crop: "fill",
+            gravity: "auto",
+            quality: "auto:good",
+            fetch_format: "auto"
+        });
+    const large = cloudinary.url(publicId,
+        {
+            width: 1200,
+            height: 1200,
+            crop: "limit",
+            quality: "auto:good",
+            fetch_format: "auto"
+        });
+
+    return {
+        url_thumbnail: thumbnail,
+        url_medium: medium,
+        url_large: large,
+    }
+};
+
+
 //
 export const PostImage = async ({ file, title, description }) => {
 
@@ -54,7 +89,16 @@ export const PostImage = async ({ file, title, description }) => {
 
     const uploadedImage = await uploadToCloudinary(file);
 
-    return { title, description, ...uploadedImage };
+
+    const publicId = uploadedImage.public_id;
+    const imageUrls = generateImageUrls(publicId);
+
+    return {
+        title,
+        description,
+        ...uploadedImage,
+        ...imageUrls
+    };
 
 }
 //
