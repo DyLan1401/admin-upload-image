@@ -1,19 +1,60 @@
+import streamifier from "streamifier";
+import cloudinary from "../config/cloudinary.js"
+
+const uploadToCloudinary = async (file) => {
+
+    //trả về một Promise để xử lý stream async
+    return new Promise((resolve, reject) => {
+        //tạo một stream upload gửi dữ liệu lên cloudinary
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                //option
+                folder: "admin-images",
+                overwrite: false,
+                quality: "auto:good",
+            },
+            //cb nhận result trả về từ Cloudinary
+            (error, result) => {
+                //error
+                if (error) {
+
+                    return reject(error);
+                }
+                //result null
+                if (!result) {
+                    return reject(
+                        new Error("Upload Image Failed")
+                    );
+                }
+                //Upload thành công
+                resolve({
+                    public_id: result.public_id,
+                    secure_url: result.secure_url
+                });
+            }
+
+        )
+        //chuẩn hóa file.buffer thành stream và upload lên cloudinary
+        streamifier.createReadStream(file.buffer).pipe(uploadStream)
+    });
+
+}
 //
 export const PostImage = async ({ file, title, description }) => {
 
     if (!file) {
         throw new Error("Image file is required.");
-
     }
     if (!title) {
         throw new Error("Title is required.");
-
     }
     if (!description) {
         throw new Error("Description is required.");
     }
 
-    return { file, title, description };
+    const uploadedImage = await uploadToCloudinary(file);
+
+    return { title, description, ...uploadedImage };
 
 }
 //

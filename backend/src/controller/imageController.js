@@ -11,7 +11,7 @@ export const PostImage = async (req, res) => {
 
         return res.status(201).json({
             success: true,
-            message: "Validate Success",
+            message: "Upload Image Success",
             data: result
         });
 

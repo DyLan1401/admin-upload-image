@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cloudinary from "./config/cloudinary.js";
 import imageRoute from "../src/routes/imageRoute.js"
 const app = express();
 
@@ -14,6 +15,8 @@ app.get("/health", (req, res) => {
         status: "ok"
     });
 });
+
+console.log(cloudinary.config());
 
 
 const PORT = process.env.PORT || 5000;
