@@ -2,31 +2,31 @@ import streamifier from "streamifier";
 import cloudinary from "../config/cloudinary.js"
 import pool from "../config/database.js"
 
-//upload ảnh lên cloudinary
+//Upload Image cloudinary
 const uploadToCloudinary = async (file) => {
 
-    //trả về một Promise để xử lý stream async
+    // Returns a Promise to handle the stream async   
     return new Promise((resolve, reject) => {
-        //tạo một stream upload gửi dữ liệu lên cloudinary
+        // Create an upload stream to send data to Cloudinary
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 //option
                 folder: "admin-images",
             },
-            //cb nhận result trả về từ Cloudinary
+            //cb receive the results returned from Cloudinary.
             (error, result) => {
-                //error
+                //Error
                 if (error) {
 
                     return reject(error);
                 }
-                //result null
+                //Result null
                 if (!result) {
                     return reject(
                         new Error("Upload Image Failed")
                     );
                 }
-                //Upload thành công
+                //Upload success
                 resolve({
                     public_id: result.public_id,
                     secure_url: result.secure_url
@@ -34,13 +34,13 @@ const uploadToCloudinary = async (file) => {
             }
 
         )
-        //chuẩn hóa file.buffer thành stream và upload lên cloudinary
+        //Normalize the buffer file into a data stream and upload it to Cloudinary
         streamifier.createReadStream(file.buffer).pipe(uploadStream)
     });
 
 };
 
-//generate 3 url image
+//Generate 3 Url Image
 const generateImageUrls = (publicId) => {
 
     //tạo url ảnh thumbnail
@@ -81,9 +81,9 @@ const generateImageUrls = (publicId) => {
     }
 };
 
-//save image and metadata vào database
+//Save image and metadata vào database
 const saveImage = async (imageData) => {
-    //tạo object 
+    //create object 
     const {
         title,
         description,
@@ -94,7 +94,7 @@ const saveImage = async (imageData) => {
         url_large,
     } = imageData;
 
-    //viết lệnh SQl thực thi
+    //Exce Sql
     const [result] = await pool.query(
         `INSERT INTO images (title,description,mime_type,public_id,url_thumbnail,url_medium,url_large)
       VALUES (?,?,?,?,?,?,?) `
@@ -108,15 +108,21 @@ const saveImage = async (imageData) => {
     );
 
     return {
-        //trả về id tự động tăng
+        //Return id auto and object
         id: result.insertId,
         ...imageData
     }
-}
+};
 
-//xử lí và upload ảnh
+//// Delete image if saving to database failed
+const deleteImageFromCloudinary = async (publicId) => {
+    return cloudinary.uploader.destroy(publicId);
+};
+
+//Process and upload images
 export const PostImage = async ({ file, title, description }) => {
 
+    //Check validate
     if (!file) {
         throw new Error("Image file is required.");
     }
@@ -126,23 +132,34 @@ export const PostImage = async ({ file, title, description }) => {
     if (!description) {
         throw new Error("Description is required.");
     }
-    //
+
+    //Call fun 
     const uploadedImage = await uploadToCloudinary(file);
 
     const publicId = uploadedImage.public_id;
+
+    //Call fun 
     const imageUrls = generateImageUrls(publicId);
 
+    //Create object
     const imageData = {
         title,
         description,
         mime_type: file.mimetype,
-        public_id: uploadedImage.public_id,
+        public_id: null,
         ...imageUrls
     };
 
-    const savedImage = await saveImage(imageData);
+    try {
+        //Save data success
+        return await saveImage(imageData);
 
-    return savedImage;
+    } catch (error) {
+        //If save data error, rollback 
+        await deleteImageFromCloudinary(publicId);
+
+        throw error;
+    }
 
 };
 

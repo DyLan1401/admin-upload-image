@@ -1,6 +1,6 @@
 import * as ImageService from "../service/imageService.js"
 
-//
+//Upload Image
 export const PostImage = async (req, res) => {
     try {
         const file = req.file;
@@ -25,7 +25,7 @@ export const PostImage = async (req, res) => {
     }
 };
 
-//
+// Get List Image
 export const GetImage = async (req, res) => {
     try {
 
