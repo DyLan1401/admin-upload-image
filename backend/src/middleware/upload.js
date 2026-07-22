@@ -1,4 +1,5 @@
 import multer from "multer";
+import AppError from "../errors/AppError.js";
 
 const upload = multer({
     //dung lượng tải file cho phép 
@@ -9,7 +10,7 @@ const upload = multer({
         //kiểm tra định dạng
         if (!allowedTypes.includes(file.mimetype)) {
             //nếu sai định dạng
-            return cb(new Error(`Định dạng file ảnh không được hỗ trợ, xin chọn lại file ảnh`));
+            return cb(new AppError(`This image file format is not supported.`, 415));
         }
         //null: không có lỗi gì hết
         //true: chấp nhận file
