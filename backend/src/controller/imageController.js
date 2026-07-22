@@ -30,21 +30,21 @@ export const PostImage = async (req, res) => {
 export const GetImage = async (req, res) => {
     try {
 
-        const queryParams = req.query;
-
-        const result = await ImageService.GetImage(queryParams);
+        const { page, limit } = req.query;
+        const result = await ImageService.GetImage({ page, limit });
 
         return res.status(200).json({
             success: true,
-            message: "đã lấy được danh sách thành công",
-            data: result
+            message: "Get Image List Success",
+            ...result
         });
     } catch (error) {
 
+        const status = error.statusCode || 500;
 
-        return res.status(400 || 500).json({
+        return res.status(status).json({
             success: false,
-            error: error.message || "hệ thống đang bị lỗi hãy thử lại sau."
+            message: error.message || "Internal Server Error"
         });
 
     }
