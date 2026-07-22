@@ -1,7 +1,7 @@
 import streamifier from "streamifier";
 import cloudinary from "../config/cloudinary.js"
 import pool from "../config/database.js"
-
+import AppError from "../errors/AppError.js"
 //Upload Image cloudinary
 const uploadToCloudinary = async (file) => {
 
@@ -124,19 +124,16 @@ export const PostImage = async ({ file, title, description }) => {
 
     //Check validate
     if (!file) {
-        const error = new Error("Image file is required.");
-        error.statusCode = 400;
-        throw error;
+        throw new AppError("Image file is required.", 400);
+
     }
     if (!title) {
-        const error = new Error("Title is required.");
-        error.statusCode = 400;
-        throw error;
+        throw new AppError("Title is required.", 400);
+
     }
     if (!description) {
-        const error = new Error("Description is required.");
-        error.statusCode = 400;
-        throw error;
+        throw new AppError("Description is required.", 400);
+
     }
 
     //Call fun 

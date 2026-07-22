@@ -1,7 +1,7 @@
 import * as ImageService from "../service/imageService.js"
 
 //Upload Image
-export const PostImage = async (req, res) => {
+export const PostImage = async (req, res, next) => {
     try {
         const file = req.file;
         const { title, description } = req.body;
@@ -16,13 +16,7 @@ export const PostImage = async (req, res) => {
         });
 
     } catch (error) {
-        const status = error.statusCode || 500;
-
-        return res.status(status).json({
-            success: false,
-            message: error.message || "Internal Server Error"
-        });
-
+        next(error);
     }
 };
 
