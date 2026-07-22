@@ -23,7 +23,7 @@ const uploadToCloudinary = async (file) => {
                 //Result null
                 if (!result) {
                     return reject(
-                        new Error("Upload Image Failed")
+                        new AppError("Upload Image Failed")
                     );
                 }
                 //Upload success
@@ -92,25 +92,33 @@ const saveImage = async (imageData) => {
         url_thumbnail,
         url_medium,
         url_large,
+        created_by = 1
     } = imageData;
 
-    //Exce Sql
-    const [result] = await pool.query(
-        `INSERT INTO images (title,description,mime_type,public_id,url_thumbnail,url_medium,url_large)
-      VALUES (?,?,?,?,?,?,?) `
-        , [title,
-            description,
-            mime_type,
-            public_id,
-            url_thumbnail,
-            url_medium,
-            url_large]
-    );
+    try {
+        //Exce Sql
+        const [result] = await pool.query(
+            `INSERT INTO images (title,description,mime_type,public_id,url_thumbnail,url_medium,url_large,created_by)
+      VALUES (?,?,?,?,?,?,?,?) `
+            , [title,
+                description,
+                mime_type,
+                public_id,
+                url_thumbnail,
+                url_medium,
+                url_large,
+                created_by
+            ]
+        );
 
-    return {
-        //Return id auto and object
-        id: result.insertId,
-        ...imageData
+        return {
+            //Return id auto and object
+            id: result.insertId,
+            ...imageData
+        }
+    } catch (error) {
+        throw new AppError("Database query failed", 500);
+
     }
 };
 
@@ -133,7 +141,6 @@ export const PostImage = async ({ file, title, description }) => {
     }
     if (!description) {
         throw new AppError("Description is required.", 400);
-
     }
 
     //Call fun 
@@ -161,7 +168,7 @@ export const PostImage = async ({ file, title, description }) => {
         //If save data error, rollback 
         await deleteImageFromCloudinary(publicId);
 
-        throw error;
+        throw new AppError("Rollback success", 500);
     }
 
 };
