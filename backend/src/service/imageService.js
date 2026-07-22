@@ -169,47 +169,45 @@ export const PostImage = async ({ file, title, description }) => {
 
 //
 export const GetImage = async ({ page, limit }) => {
-
     //Return Image/page
     const currentPage = Math.max(1, Number.parseInt(page, 10) || 1);
-
     //Return Image/request
     const currentLimit = Math.min(
         100, Math.max(1, Number.parseInt(limit, 10) || 20)
     );
-
     //
     const offset = (currentPage - 1) * currentLimit;
-
-    //total Image SQL
-    const [[countResult]] = await pool.query(
-        `SELECT COUNT(*) AS total FROM images`
-    );
-    //Total Image 
-    const total = countResult.total;
-
-    //Totalpage
-    const totalPages = Math.ceil(total / currentLimit);
-
-    //Exce Sql
-    const [result] = await pool.query(
-        `SELECT
-        id,title,description,url_thumbnail,created_at 
+    try {
+        //total Image SQL
+        const [[countResult]] = await pool.query(
+            `SELECT COUNT(*) AS total FROM images`
+        );
+        //Total Image 
+        const total = countResult.total;
+        //Totalpage
+        const totalPages = Math.ceil(total / currentLimit);
+        //Exce Sql
+        const [result] = await pool.query(
+            `SELECT
+        id, title, description, url_thumbnail,created_by, created_at 
         FROM images ORDER BY created_at DESC, id DESC
         LIMIT ?
         OFFSET ?`,
-        [currentLimit, offset]
-    );
+            [currentLimit, offset]
+        );
 
-    return {
-        data: result,
-        pagination: {
-            page: currentPage,
-            limit: currentLimit,
-            total,
-            total_pages: totalPages,
-        },
-    };
+        return {
+            data: result,
+            pagination: {
+                page: currentPage,
+                limit: currentLimit,
+                total,
+                total_pages: totalPages,
+            },
+        };
+    } catch (error) {
+        throw new AppError("Database query failed.", 500);
+    }
 }
 
 

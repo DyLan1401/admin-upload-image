@@ -21,7 +21,7 @@ export const PostImage = async (req, res, next) => {
 };
 
 // Get List Image
-export const GetImage = async (req, res) => {
+export const GetImage = async (req, res, next) => {
     try {
 
         const { page, limit } = req.query;
@@ -33,13 +33,8 @@ export const GetImage = async (req, res) => {
             ...result
         });
     } catch (error) {
+        next(error);
 
-        const status = error.statusCode || 500;
-
-        return res.status(status).json({
-            success: false,
-            message: error.message || "Internal Server Error"
-        });
 
     }
 }
