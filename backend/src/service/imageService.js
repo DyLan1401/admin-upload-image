@@ -168,7 +168,7 @@ export const PostImage = async ({ file, title, description }) => {
         //If save data error, rollback 
         await deleteImageFromCloudinary(publicId);
 
-        throw new AppError("Rollback success", 500);
+        throw new AppError("Failed to save image uploaded file was rolled back.", 500);
     }
 
 };

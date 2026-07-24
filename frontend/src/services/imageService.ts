@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import type { UploadImageRequest } from "@/types/image";
+import type { UploadImageRequest, GetImagesResponse } from "@/types/image";
 
 export const uploadImage = async (
     data: UploadImageRequest,
@@ -15,3 +15,16 @@ export const uploadImage = async (
 
     return response.data;
 };
+
+
+export const getImages = async (
+    page: number,
+    limit: number
+) => {
+    const response = await api.get<GetImagesResponse>(
+        `/api/admin/images?page=${page}&limit=${limit}`
+    );
+
+    return response.data;
+
+}

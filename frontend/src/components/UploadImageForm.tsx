@@ -7,14 +7,26 @@ import { validateUpload, type UploadErrors } from "@/lib/uploadValidation";
 import { uploadImage } from "@/services/imageService";
 import type { UploadImageRequest } from "@/types/image";
 
-const EMPTY_FORM: UploadImageRequest = { title: "", description: "" };
+
+const EMPTY_FORM: UploadImageRequest = {
+    title: "",
+    description: ""
+};
 
 type Feedback = {
     type: "success" | "error";
     text: string;
 };
 
-export default function UploadImageForm() {
+type UploadImageFormProps = {
+    onSuccess: () => void;
+    onClose: () => void;
+};
+
+export default function UploadImageForm({
+    onSuccess,
+    onClose,
+}: UploadImageFormProps) {
     const [formData, setFormData] = useState<UploadImageRequest>(EMPTY_FORM);
     const [errors, setErrors] = useState<UploadErrors>({});
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -22,6 +34,8 @@ export default function UploadImageForm() {
     const [feedback, setFeedback] = useState<Feedback | null>(null);
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+
 
     //xóa previewUrl nếu còn
     useEffect(() => {
@@ -63,6 +77,10 @@ export default function UploadImageForm() {
             resetForm();
             //trả về thông báo
             setFeedback({ type: "success", text: "Upload image successfully." });
+
+            onSuccess();
+            onClose();
+
         } catch (error) {
             //trả về thông báo lỗi
             const axiosError = error as AxiosError<{ error?: string }>;
@@ -100,15 +118,35 @@ export default function UploadImageForm() {
     const handleCancel = () => {
         resetForm();
         setFeedback(null);
+        onClose();
     };
 
     return (
-        <div className="w-full max-w-md">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            role="presentation"
+            onMouseDown={(event) => {
+                if (event.target === event.currentTarget) handleCancel();
+            }}
+        >
             <form
                 onSubmit={handleSubmit}
-                className="rounded border border-gray-300 bg-white px-8 pt-6 pb-8 font-semibold"
+                className="w-full max-w-md rounded border border-gray-300 bg-white px-8 pt-6 pb-8 font-semibold"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="upload-image-title"
             >
-                <h1 className="p-2 text-center text-xl font-bold">UPLOAD IMAGE</h1>
+                <div className="mb-4 flex items-center justify-between">
+                    <h1 id="upload-image-title" className="text-xl font-bold">UPLOAD IMAGE</h1>
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        aria-label="Close upload form"
+                        className="text-2xl leading-none text-gray-500 hover:text-gray-800"
+                    >
+                        ×
+                    </button>
+                </div>
 
                 <div className="mb-4">
                     <label htmlFor="title" className="mb-2 block text-sm font-bold text-gray-700">
@@ -197,8 +235,6 @@ export default function UploadImageForm() {
                     </p>
                 )}
             </form>
-
-
         </div>
     );
 }
